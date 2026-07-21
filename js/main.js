@@ -42,20 +42,20 @@
     if (occupancy <= 12) {
       return {
         className: "status--quiet",
-        text: "QUIET RIGHT NOW — GOOD TIME TO TRAIN"
+        text: "ILLUSTRATIVE LOW OCCUPANCY"
       };
     }
 
     if (occupancy <= 27) {
       return {
         className: "status--steady",
-        text: "STEADY — SPACE AT EVERY RACK"
+        text: "ILLUSTRATIVE MODERATE OCCUPANCY"
       };
     }
 
     return {
       className: "status--busy",
-      text: "BUSY — QUIET AGAIN AFTER 20:00"
+      text: "ILLUSTRATIVE HIGH OCCUPANCY"
     };
   }
 
@@ -85,7 +85,7 @@
     });
 
     document.querySelectorAll("[data-dial-graphic]").forEach((graphic) => {
-      graphic.setAttribute("aria-label", `${occupancy} of ${CAPACITY} members inside`);
+      graphic.setAttribute("aria-label", `Illustrative occupancy demo index: ${occupancy}`);
     });
 
     document.querySelectorAll("[data-status]").forEach((element) => {
@@ -118,7 +118,7 @@
       bar.className = "forecast-bar";
       bar.style.setProperty("--bar-value", `${value}%`);
       bar.setAttribute("aria-hidden", "true");
-      bar.title = `${startHour}:00–${endHour}:00 — ${value}% forecast occupancy`;
+      bar.title = `${startHour}:00–${endHour}:00 — illustrative demo index ${value}`;
 
       if (value === peakValue) {
         bar.classList.add("is-peak");
@@ -134,7 +134,7 @@
     chart.replaceChildren(fragment);
     chart.setAttribute(
       "aria-label",
-      "Today's occupancy forecast in two-hour slots. Peak expected between 18:00 and 20:00."
+      "Illustrative occupancy forecast concept. Not live data."
     );
   }
 
