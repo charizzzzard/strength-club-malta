@@ -206,6 +206,191 @@
     });
   }
 
+  function setupConceptSlider() {
+    const slider = document.querySelector("[data-concept-slider]");
+    if (!slider) {
+      return;
+    }
+
+    const slides = Array.from(slider.querySelectorAll("[data-concept-slide]"));
+    const dots = Array.from(slider.querySelectorAll("[data-concept-dot]"));
+    const previousButton = slider.querySelector("[data-concept-previous]");
+    const nextButton = slider.querySelector("[data-concept-next]");
+    const toggleButton = slider.querySelector("[data-concept-toggle]");
+    const toggleIcon = slider.querySelector("[data-concept-toggle-icon]");
+
+    if (slides.length < 2 || dots.length !== slides.length
+      || !previousButton || !nextButton || !toggleButton || !toggleIcon) {
+      return;
+    }
+
+    const AUTOPLAY_INTERVAL = 5000;
+    const SWIPE_THRESHOLD = 45;
+    let activeIndex = 0;
+    let timerId = null;
+    let userPaused = false;
+    let hoverPaused = false;
+    let focusPaused = false;
+    let visibilityPaused = document.hidden;
+    let touchStartX = null;
+    let touchStartY = null;
+
+    const clearTimer = () => {
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+        timerId = null;
+      }
+    };
+
+    const canAutoplay = () => !motionQuery.matches
+      && !userPaused
+      && !hoverPaused
+      && !focusPaused
+      && !visibilityPaused;
+
+    const updateToggle = () => {
+      toggleButton.setAttribute("aria-label", userPaused ? "Play slideshow" : "Pause slideshow");
+      toggleButton.setAttribute("aria-pressed", String(userPaused));
+      toggleIcon.textContent = userPaused ? "▶" : "Ⅱ";
+    };
+
+    const setActiveSlide = (nextIndex) => {
+      activeIndex = (nextIndex + slides.length) % slides.length;
+
+      slides.forEach((slide, index) => {
+        const isActive = index === activeIndex;
+        slide.classList.toggle("is-active", isActive);
+        slide.setAttribute("aria-hidden", String(!isActive));
+      });
+
+      dots.forEach((dot, index) => {
+        const isActive = index === activeIndex;
+        dot.classList.toggle("is-active", isActive);
+        if (isActive) {
+          dot.setAttribute("aria-current", "true");
+        } else {
+          dot.removeAttribute("aria-current");
+        }
+      });
+    };
+
+    const scheduleAutoplay = () => {
+      clearTimer();
+      if (!canAutoplay()) {
+        return;
+      }
+
+      timerId = window.setTimeout(() => {
+        setActiveSlide(activeIndex + 1);
+        scheduleAutoplay();
+      }, AUTOPLAY_INTERVAL);
+    };
+
+    const showSlide = (nextIndex) => {
+      setActiveSlide(nextIndex);
+      scheduleAutoplay();
+    };
+
+    previousButton.addEventListener("click", () => showSlide(activeIndex - 1));
+    nextButton.addEventListener("click", () => showSlide(activeIndex + 1));
+
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        showSlide(Number(dot.dataset.slideIndex));
+      });
+    });
+
+    toggleButton.addEventListener("click", () => {
+      userPaused = !userPaused;
+      updateToggle();
+      scheduleAutoplay();
+    });
+
+    slider.addEventListener("mouseenter", () => {
+      hoverPaused = true;
+      clearTimer();
+    });
+
+    slider.addEventListener("mouseleave", () => {
+      hoverPaused = false;
+      scheduleAutoplay();
+    });
+
+    slider.addEventListener("focusin", () => {
+      focusPaused = true;
+      clearTimer();
+    });
+
+    slider.addEventListener("focusout", (event) => {
+      if (!slider.contains(event.relatedTarget)) {
+        focusPaused = false;
+        scheduleAutoplay();
+      }
+    });
+
+    slider.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        showSlide(activeIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        showSlide(activeIndex + 1);
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        showSlide(0);
+      } else if (event.key === "End") {
+        event.preventDefault();
+        showSlide(slides.length - 1);
+      }
+    });
+
+    slider.addEventListener("touchstart", (event) => {
+      const touch = event.touches[0];
+      if (!touch) {
+        return;
+      }
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+    }, { passive: true });
+
+    slider.addEventListener("touchend", (event) => {
+      const touch = event.changedTouches[0];
+      if (!touch || touchStartX === null || touchStartY === null) {
+        return;
+      }
+
+      const horizontalDistance = touch.clientX - touchStartX;
+      const verticalDistance = touch.clientY - touchStartY;
+      touchStartX = null;
+      touchStartY = null;
+
+      if (Math.abs(horizontalDistance) < SWIPE_THRESHOLD
+        || Math.abs(horizontalDistance) <= Math.abs(verticalDistance)) {
+        return;
+      }
+
+      showSlide(activeIndex + (horizontalDistance < 0 ? 1 : -1));
+    }, { passive: true });
+
+    document.addEventListener("visibilitychange", () => {
+      visibilityPaused = document.hidden;
+      scheduleAutoplay();
+    });
+
+    const syncMotionPreference = () => {
+      const reduceMotion = motionQuery.matches;
+      slider.classList.toggle("is-reduced-motion", reduceMotion);
+      toggleButton.hidden = reduceMotion;
+      scheduleAutoplay();
+    };
+
+    motionQuery.addEventListener("change", syncMotionPreference);
+    setActiveSlide(0);
+    updateToggle();
+    slider.classList.add("slider-ready");
+    syncMotionPreference();
+  }
+
   function setupScrollReveal() {
     const revealElements = document.querySelectorAll(".reveal");
 
@@ -235,6 +420,7 @@
   renderForecast();
   prepareDials();
   setupMobileMenu();
+  setupConceptSlider();
   setupScrollReveal();
   setupOccupancySimulation();
 }());
