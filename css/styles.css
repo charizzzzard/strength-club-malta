@@ -29,6 +29,8 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--header-height);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -984,6 +986,13 @@ h3 {
   white-space: nowrap;
 }
 
+.membership-badges {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .price-card--featured > p {
   color: rgba(220, 212, 194, 0.78);
 }
@@ -1492,6 +1501,105 @@ h3 {
 
   .footer-bottom p {
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 430px) {
+  :root {
+    --gutter: 1rem;
+  }
+
+  .container {
+    width: min(calc(100% - 2rem), var(--container));
+    margin-inline: auto;
+  }
+
+  .concept-grid,
+  .steps-grid,
+  .pricing-grid {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  .info-card,
+  .step,
+  .price-card {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 1.25rem;
+    text-align: center;
+  }
+
+  .info-card p,
+  .step p,
+  .price-card > p {
+    margin-inline: auto;
+  }
+
+  .card-number,
+  .step-label {
+    text-align: center;
+  }
+
+  .membership > .container > .eyebrow {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .membership h2 {
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .price-card-head {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+  }
+
+  .price-card-head > div {
+    width: 100%;
+  }
+
+  .price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .membership-badges {
+    width: 100%;
+    align-items: center;
+  }
+
+  .spots-badge {
+    max-width: 100%;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .price-card--featured > p {
+    max-width: 34rem;
+    overflow-wrap: break-word;
+  }
+
+  .terms-line {
+    max-width: 100%;
+    margin-inline: auto;
+    text-align: center;
+    overflow-wrap: break-word;
+  }
+
+  .terms-line span {
+    margin-inline: 0.35rem;
+  }
+
+  .membership .button {
+    display: flex;
+    width: fit-content;
+    margin-inline: auto;
   }
 }
 
